@@ -87,8 +87,36 @@ define(["./has", "./env"], function(has, env){
 	});
 
 	var dom = {
-		document: env.global.document || null,
-		body: function(){
+		window: function(element){
+			// based on work by Diego Perini and John-David Dalton
+			var frame,
+				i = -1,
+				doc = dom.document(element),
+				gdoc = env.global.document,
+				frames = env.global.frames;
+
+			if(gdoc != doc){
+				while((frame = frames[++i])){
+					if(frame.document == doc){
+						return frame;
+					}
+				}
+			}
+			return env.global;
+		},
+		document: function(element){
+			// based on work by John-David Dalton
+			var doc = null;
+			if(element){
+				if(element.nodeType == 9){
+					doc = element;
+				}else{
+					doc = element.ownerDocument || element.document;
+				}
+			}
+			return doc || env.global.document;
+		},
+		body: function(element){
 			// summary:
 			//		Return the body element of the document
 			//		return the body object associated with dojo.doc
@@ -97,7 +125,8 @@ define(["./has", "./env"], function(has, env){
 
 			// Note: document.body is not defined for a strict xhtml document
 			// Would like to memoize this, but dojo.doc can change vi dojo.withDoc().
-			return dom.document.body || dom.document.getElementsByTagName("body")[0];
+			var doc = dom.document(element);
+			return doc.body || doc.getElementsByTagName("body")[0];
 		}
 	};
 
@@ -106,7 +135,7 @@ define(["./has", "./env"], function(has, env){
 			if(typeof id != "string"){
 				return id;
 			}
-			var _d = doc || dom.document, te = id && _d.getElementById(id);
+			var _d = doc || dom.document(), te = id && _d.getElementById(id);
 			// attributes.id.value is better than just id in case the
 			// user has a name=id inside a form
 			if(te && (te.attributes.id.value == id || te.id == id)){
@@ -129,7 +158,7 @@ define(["./has", "./env"], function(has, env){
 		dom.byId = function(id, doc){
 			// inline'd type check.
 			// be sure to return null per documentation, to match IE branch.
-			return ((typeof id == "string") ? (doc || dom.document).getElementById(id) : id) || null; // DOMNode
+			return ((typeof id == "string") ? (doc || dom.document()).getElementById(id) : id) || null; // DOMNode
 		};
 	}
 
