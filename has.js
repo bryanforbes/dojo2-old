@@ -101,20 +101,6 @@ define(["require"], function(require) {
 		has.add("dojo-sniff", 1);
 	}
 
-	if(has("host-browser")){
-		// Common application level tests
-		has.add("dom-addeventlistener", !!document.addEventListener);
-		has.add("touch", "ontouchstart" in document);
-
-		// Tests for DOMNode.attributes[] behavior
-		// dom-attributes-explicit - attributes[] only lists explicitly user specified attributes
-		// dom-attributes-specified-flag (IE8) - need to check attr.specified flag to skip attributes user didn't specify
-		// Otherwise, it's IE6-7. attributes[] will list hundreds of values, so need to do outerHTML to get attrs instead.
-		var form = document.createElement("form");
-		has.add("dom-attributes-explicit", !form.attributes.length); // W3C
-		has.add("dom-attributes-specified-flag", form.attributes.length < 40);	// IE8
-	}
-
 	has.clearElement = /*===== dojo.has.clearElement= ======*/ function(element) {
 		// summary:
 		//	 Deletes the contents of the element passed to test functions.
@@ -174,6 +160,30 @@ define(["require"], function(require) {
 			loaded();
 		}
 	};
+
+	// Common browser tests
+	if(has("host-browser")){
+		has.add("dom-addeventlistener", !!document.addEventListener);
+		has.add("touch", "ontouchstart" in document);
+
+		// Tests for DOMNode.attributes[] behavior
+		// dom-attributes-explicit - attributes[] only lists explicitly user specified attributes
+		// dom-attributes-specified-flag (IE8) - need to check attr.specified flag to skip attributes user didn't specify
+		// Otherwise, it's IE6-7. attributes[] will list hundreds of values, so need to do outerHTML to get attrs instead.
+		var form = document.createElement("form");
+		has.add("dom-attributes-explicit", !form.attributes.length); // W3C
+		has.add("dom-attributes-specified-flag", form.attributes.length < 40);	// IE8
+	}
+
+	// Common JS tests
+	has.add("activex", typeof ActiveXObject != "undefined");
+	has.add("bug-for-in-skips-shadowed", function(){
+		// if true, the for-in interator skips object properties that exist in Object's prototype (IE 6 - ?)
+		for(var i in {toString: 1}){
+			return 0;
+		}
+		return 1;
+	});
 
 	return has;
 });
