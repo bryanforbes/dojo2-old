@@ -56,34 +56,34 @@ define(["./has", "./env"], function(has, env){
 	=====*/
 
 	has.add("bug-getelementbyid", function(g, d){
-        var input,
-            name = "__test_" + (+new Date()),
-            root = d.getElementsByTagName("script")[0].parentNode,
-            buggy = null;
+		var input,
+			name = "__test_" + (+new Date()),
+			root = d.getElementsByTagName("script")[0].parentNode,
+			buggy = null;
 
 		input = d.createElement("input");
 		input.name = name;
 
-        try{
-            root.insertBefore(input, root.firstChild);
-            buggy = d.getElementById(name) == input;
-            root.removeChild(input);
-        }catch(e){}
+		try{
+			root.insertBefore(input, root.firstChild);
+			buggy = d.getElementById(name) == input;
+			root.removeChild(input);
+		}catch(e){}
 
 		if(buggy){
 			return buggy;
 		}
 
-        var script = d.createElement("script");
-        script.id = name;
-        script.type = "text/javascript";
-        root.insertBefore(script, root.firstChild);
+		var script = d.createElement("script");
+		script.id = name;
+		script.type = "text/javascript";
+		root.insertBefore(script, root.firstChild);
 
-        buggy = d.getElementById(name.toUpperCase()) == script;
+		buggy = d.getElementById(name.toUpperCase()) == script;
 
-        root.removeChild(script);
+		root.removeChild(script);
 
-        return buggy;
+		return buggy;
 	});
 
 	var dom = {
@@ -146,6 +146,21 @@ define(["./has", "./env"], function(has, env){
 		}catch(e){ /* squelch, return false */ }
 		return false; // Boolean
 	};
+
+	// Common feature tests
+	has.add("dom-qsa", function(global, document, element){
+		return !!element.querySelectorAll;
+	});
+	has.add("dom-matches-selector", function(global, document, element){
+		return !!(
+			// IE9, WebKit, Firefox have this, but not Opera yet
+			element.matchesSelector ||
+			element.webkitMatchesSelector ||
+			element.mozMatchesSelector ||
+			element.msMatchesSelector ||
+			element.oMatchesSelector
+		);
+	});
 
 	return dom;
 });
