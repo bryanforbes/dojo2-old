@@ -66,7 +66,7 @@ define(["./has", "./env"], function(has, env){
 
 		try{
 			root.insertBefore(input, root.firstChild);
-			buggy = d.getElementById(name) == input;
+			buggy = d.getElementById(name) === input;
 			root.removeChild(input);
 		}catch(e){}
 
@@ -79,7 +79,7 @@ define(["./has", "./env"], function(has, env){
 		script.type = "text/javascript";
 		root.insertBefore(script, root.firstChild);
 
-		buggy = d.getElementById(name.toUpperCase()) == script;
+		buggy = d.getElementById(name.toUpperCase()) === script;
 
 		root.removeChild(script);
 
@@ -95,9 +95,9 @@ define(["./has", "./env"], function(has, env){
 				gdoc = env.global.document,
 				frames = env.global.frames;
 
-			if(gdoc != doc){
+			if(gdoc !== doc){
 				while((frame = frames[++i])){
-					if(frame.document == doc){
+					if(frame.document === doc){
 						return frame;
 					}
 				}
@@ -108,7 +108,7 @@ define(["./has", "./env"], function(has, env){
 			// based on work by John-David Dalton
 			var doc = null;
 			if(element){
-				if(element.nodeType == 9){
+				if(element.nodeType === 9){
 					doc = element;
 				}else{
 					doc = element.ownerDocument || element.document;
@@ -132,13 +132,13 @@ define(["./has", "./env"], function(has, env){
 
 	if(has("bug-getelementbyid")){
 		dom.byId = function(id, doc){
-			if(typeof id != "string"){
+			if(typeof id !== "string"){
 				return id;
 			}
 			var _d = doc || dom.document(), te = id && _d.getElementById(id);
 			// attributes.id.value is better than just id in case the
 			// user has a name=id inside a form
-			if(te && (te.attributes.id.value == id || te.id == id)){
+			if(te && (te.attributes.id.value === id || te.id === id)){
 				return te;
 			}else{
 				var eles = _d.all[id];
@@ -148,7 +148,7 @@ define(["./has", "./env"], function(has, env){
 				// if more than 1, choose first with the correct id
 				var i = 0;
 				while((te = eles[i++])){
-					if((te.attributes && te.attributes.id && te.attributes.id.value == id) || te.id == id){
+					if((te.attributes && te.attributes.id && te.attributes.id.value === id) || te.id === id){
 						return te;
 					}
 				}
@@ -158,7 +158,7 @@ define(["./has", "./env"], function(has, env){
 		dom.byId = function(id, doc){
 			// inline'd type check.
 			// be sure to return null per documentation, to match IE branch.
-			return ((typeof id == "string") ? (doc || dom.document()).getElementById(id) : id) || null; // DOMNode
+			return ((typeof id === "string") ? (doc || dom.document()).getElementById(id) : id) || null; // DOMNode
 		};
 	}
 
@@ -167,7 +167,7 @@ define(["./has", "./env"], function(has, env){
 			node = dom.byId(node);
 			ancestor = dom.byId(ancestor);
 			while(node){
-				if(node == ancestor){
+				if(node === ancestor){
 					return true; // Boolean
 				}
 				node = node.parentNode;
