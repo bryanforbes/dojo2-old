@@ -1,28 +1,17 @@
-define(['./when', './aspect'], function(when, aspect){
+define(['./compose', './when', './aspect'], function(compose, when, aspect){
 	var slice = [].slice;
 
-	function Stateful(properties){
-		if(properties){ this.set(properties); }
-	}
-
-	Stateful.prototype = {
-		constructor: Stateful,
-
-		_propNames: {},
-		_getPropNames: function(name){
-			var pn = this._propNames;
-			if(pn[name]){
-				return pn[name];
-			}
-			return pn[name] = {
-				s: '_get_' + name,
-				g: '_set_' + name
-			};
-		},
-
+	var Stateful = compose(function(properties){
+		if(properties){
+			this.set(properties);
+		}
+	},{
 		get: function(name){
-			var getterName = this._getPropNames(name).g;
-			return typeof this[getterName] === 'function' ? this[getterName]() : this[name];
+			var descriptors = this.__descriptors || {},
+				descriptor = descriptors[name] || {},
+				get = descriptor.get;
+
+			return get ? get.call(this) : this[name];
 		},
 
 		set: function(name, value){
@@ -35,13 +24,13 @@ define(['./when', './aspect'], function(when, aspect){
 				return this;
 			}
 
-			var setterName = this._getPropNames(name).s,
-				setter = this[setterName],
+			var descriptors = this.__descriptors || {},
+				descriptor = descriptors[name] || {},
 				oldValue = this.get(name),
-				result;
+				set = descriptor.set;
 
-			if(typeof setter === 'function'){
-				result = setter.apply(this, slice.call(arguments, 1));
+			if(set){
+				result = set.apply(this, slice.call(arguments, 1));
 			}else{
 				this[name] = value;
 			}
@@ -78,6 +67,41 @@ define(['./when', './aspect'], function(when, aspect){
 
 			return aspect.after(callbacks, name, callback, true);
 		}
+	});
+
+	var hasOwn = {}.hasOwnProperty;
+	Stateful.defineProperty = function(descriptor){
+		if(!descriptor || typeof descriptor !== 'object'){
+			throw new TypeError('Property description must be an object: ' + descriptor);
+		}
+
+		return new compose.Decorator(function(key){
+			var prototype = this,
+				descriptors = prototype.__descriptors || (prototype.__descriptors = {}),
+				d;
+
+			// If descriptors exists, but it's not on this prototype, create the object
+			// on the prototype and delegate it from the parent prototype's property so
+			// there is inheritance for descriptors.
+			if(descriptors && !hasOwn.call(prototype, '__descriptors')){
+				descriptors = prototype.__descriptors = compose.create(prototype.__descriptors);
+			}
+
+			d = descriptors[key] = {};
+
+			if(hasOwn.call(descriptor, 'get')){
+				if(typeof descriptor.get !== 'function'){
+					throw new TypeError('Getter must be a function: ' + descriptor.get);
+				}
+				d.get = descriptor.get;
+			}
+			if(hasOwn.call(descriptor, 'set')){
+				if(typeof descriptor.set !== 'function'){
+					throw new TypeError('Setter must be a function: ' + descriptor.set);
+				}
+				d.set = descriptor.set;
+			}
+		});
 	};
 
 	return Stateful;
