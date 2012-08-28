@@ -86,14 +86,16 @@ define(["./has", "./env"], function(has, env){
 		return buggy;
 	});
 
+	var global = this;
+
 	var dom = {
 		window: function(element){
 			// based on work by Diego Perini and John-David Dalton
 			var frame,
 				i = -1,
 				doc = dom.document(element),
-				gdoc = env.global.document,
-				frames = env.global.frames;
+				gdoc = global.document,
+				frames = global.frames;
 
 			if(gdoc !== doc){
 				while((frame = frames[++i])){
@@ -102,7 +104,7 @@ define(["./has", "./env"], function(has, env){
 					}
 				}
 			}
-			return env.global;
+			return global;
 		},
 		document: function(element){
 			// based on work by John-David Dalton
