@@ -1,4 +1,4 @@
-define(["./has", "./env"], function(has, env){
+define(['exports', './has'], function(exports, has){
 	// module:
 	//		dojo/dom
 	// summary:
@@ -9,7 +9,7 @@ define(["./has", "./env"], function(has, env){
 	// =============================
 
 	/*=====
-	dojo.byId = function(id, doc){
+	dom.byId = function(id, doc){
 		// summary:
 		//		Returns DOM node with matching `id` attribute or `null`
 		//		if not found. If `id` is a DomNode, this function is a no-op.
@@ -18,30 +18,29 @@ define(["./has", "./env"], function(has, env){
 		//		A string to match an HTML id attribute or a reference to a DOM Node
 		//
 		// doc: Document?
-		//		Document to work in. Defaults to the current value of
-		//		dojo.doc.  Can be used to retrieve
+		//		Document to work in. Defaults to `document`. Can be used to retrieve
 		//		node references from other documents.
 		//
 		// example:
 		//		Look up a node by ID:
-		//	|	var n = dojo.byId("foo");
+		//	|	var n = dom.byId('foo');
 		//
 		// example:
 		//		Check if a node exists, and use it.
-		//	|	var n = dojo.byId("bar");
+		//	|	var n = dom.byId('bar');
 		//	|	if(n){ doStuff() ... }
 		//
 		// example:
 		//		Allow string or DomNode references to be passed to a custom function:
 		//	|	var foo = function(nodeOrId){
-		//	|		nodeOrId = dojo.byId(nodeOrId);
+		//	|		nodeOrId = dom.byId(nodeOrId);
 		//	|		// ... more stuff
 		//	|	}
 	};
 	=====*/
 
 	/*=====
-	dojo.isDescendant = function(node, ancestor){
+	dom.isDescendant = function(node, ancestor){
 		// summary:
 		//		Returns true if node is a descendant of ancestor
 		// node: DOMNode|String
@@ -51,17 +50,17 @@ define(["./has", "./env"], function(has, env){
 		//
 		// example:
 		//		Test is node id="bar" is a descendant of node id="foo"
-		//	|	if(dojo.isDescendant("bar", "foo")){ ... }
+		//	|	if(dom.isDescendant('bar', 'foo')){ ... }
 	};
 	=====*/
 
-	has.add("bug-getelementbyid", function(g, d){
+	has.add('bug-getelementbyid', function(g, d){
 		var input,
-			name = "__test_" + (+new Date()),
-			root = d.getElementsByTagName("script")[0].parentNode,
+			name = '__test_' + (+new Date()),
+			root = d.getElementsByTagName('script')[0].parentNode,
 			buggy = null;
 
-		input = d.createElement("input");
+		input = d.createElement('input');
 		input.name = name;
 
 		try{
@@ -74,9 +73,9 @@ define(["./has", "./env"], function(has, env){
 			return buggy;
 		}
 
-		var script = d.createElement("script");
+		var script = d.createElement('script');
 		script.id = name;
-		script.type = "text/javascript";
+		script.type = 'text/javascript';
 		root.insertBefore(script, root.firstChild);
 
 		buggy = d.getElementById(name.toUpperCase()) === script;
@@ -88,56 +87,12 @@ define(["./has", "./env"], function(has, env){
 
 	var global = this;
 
-	var dom = {
-		window: function(element){
-			// based on work by Diego Perini and John-David Dalton
-			var frame,
-				i = -1,
-				doc = dom.document(element),
-				gdoc = global.document,
-				frames = global.frames;
-
-			if(gdoc !== doc){
-				while((frame = frames[++i])){
-					if(frame.document === doc){
-						return frame;
-					}
-				}
-			}
-			return global;
-		},
-		document: function(element){
-			// based on work by John-David Dalton
-			var doc = null;
-			if(element){
-				if(element.nodeType === 9){
-					doc = element;
-				}else{
-					doc = element.ownerDocument || element.document;
-				}
-			}
-			return doc || env.global.document;
-		},
-		body: function(element){
-			// summary:
-			//		Return the body element of the document
-			//		return the body object associated with dojo.doc
-			// example:
-			//	|	dom.body().appendChild(dojo.doc.createElement('div'));
-
-			// Note: document.body is not defined for a strict xhtml document
-			// Would like to memoize this, but dojo.doc can change vi dojo.withDoc().
-			var doc = dom.document(element);
-			return doc.body || doc.getElementsByTagName("body")[0];
-		}
-	};
-
-	if(has("bug-getelementbyid")){
-		dom.byId = function(id, doc){
-			if(typeof id !== "string"){
+	if(has('bug-getelementbyid')){
+		exports.byId = function(id, doc){
+			if(typeof id !== 'string'){
 				return id;
 			}
-			var _d = doc || dom.document(), te = id && _d.getElementById(id);
+			var _d = doc || document, te = id && _d.getElementById(id);
 			// attributes.id.value is better than just id in case the
 			// user has a name=id inside a form
 			if(te && (te.attributes.id.value === id || te.id === id)){
@@ -157,17 +112,17 @@ define(["./has", "./env"], function(has, env){
 			}
 		};
 	}else{
-		dom.byId = function(id, doc){
+		exports.byId = function(id, doc){
 			// inline'd type check.
 			// be sure to return null per documentation, to match IE branch.
-			return ((typeof id === "string") ? (doc || dom.document()).getElementById(id) : id) || null; // DOMNode
+			return ((typeof id === 'string') ? (doc || document).getElementById(id) : id) || null; // DOMNode
 		};
 	}
 
-	dom.isDescendant = function(/*DOMNode|String*/node, /*DOMNode|String*/ancestor){
+	exports.isDescendant = function(/*DOMNode|String*/node, /*DOMNode|String*/ancestor){
 		try{
-			node = dom.byId(node);
-			ancestor = dom.byId(ancestor);
+			node = exports.byId(node);
+			ancestor = exports.byId(ancestor);
 			while(node){
 				if(node === ancestor){
 					return true; // Boolean
@@ -179,10 +134,10 @@ define(["./has", "./env"], function(has, env){
 	};
 
 	// Common feature tests
-	has.add("dom-qsa", function(global, document, element){
+	has.add('dom-qsa', function(global, document, element){
 		return !!element.querySelectorAll;
 	});
-	has.add("dom-matches-selector", function(global, document, element){
+	has.add('dom-matches-selector', function(global, document, element){
 		return !!(
 			// IE9, WebKit, Firefox have this, but not Opera yet
 			element.matchesSelector ||
@@ -192,6 +147,13 @@ define(["./has", "./env"], function(has, env){
 			element.oMatchesSelector
 		);
 	});
-
-	return dom;
+	has.add('dom-limited-innerhtml', function(global, document){
+		var element = document.createElement('table');
+		try{
+			element.innerHTML = '<tbody></tbody>';
+		}catch(e){
+			return true;
+		}
+		return element.children.length;
+	});
 });
