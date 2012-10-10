@@ -74,23 +74,28 @@ dojo.query = function(selector, context){
 =====*/
 
 function queryForEngine(engine, NodeList){
-	var query = function(/*String*/ query, /*String|DOMNode?*/ root){
+	var query = function(/*String*/ queryString, /*String|DOMNode?*/ root){
 		//	summary:
 		//		Returns nodes which match the given CSS selector, searching the
 		//		entire document by default but optionally taking a node to scope
 		//		the search by. Returns an instance of dojo.NodeList.
+		var nl;
 		if(typeof root === "string"){
 			root = dom.byId(root);
 			if(!root){
-				return new NodeList([]);
+				nl = new NodeList([]);
+				nl._query = query;
+				return nl;
 			}
 		}
-		var results = typeof query === "string" ? engine(query, root) : query.orphan ? query : [query];
+		var results = typeof queryString === "string" ? engine(queryString, root) : queryString.orphan ? queryString : [queryString];
 		if(results.orphan){
 			// already wrapped
 			return results;
 		}
-		return new NodeList(results);
+		nl = new NodeList(results);
+		nl._query = query;
+		return nl;
 	};
 	query.matches = engine.match || function(node, selector, root){
 		// summary:
@@ -116,7 +121,6 @@ function queryForEngine(engine, NodeList){
 }
 var query = queryForEngine(defaultEngine, NodeList);
 
-var filter = Array.prototype.filter;
 compose.call(NodeList.prototype, {
 	// TODO: is this needed?
 	//instantiate: function(/*String|Object*/ declaredClass, /*Object?*/ properties){
@@ -152,19 +156,6 @@ compose.call(NodeList.prototype, {
 			}
 		};
 		return handles;
-	},
-	filter: function(callback, thisObj){
-		var a = arguments, items = this, start = 0;
-		if(typeof callback === "string"){ // inline'd type check
-			items = new NodeList(query.filter(this, a[0]));
-			if(a.length === 1){
-				// if we only got a string query, pass back the filtered results
-				return items._stash(this); // dojo.NodeList
-			}
-			// if we got a callback, run it over the filtered items
-			start = 1;
-		}
-		return this._wrap(filter.call(items, a[start], a[start + 1]), this);	// dojo.NodeList
 	}
 });
 

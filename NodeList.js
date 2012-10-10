@@ -37,6 +37,7 @@ define(['./has', './compose'], function(has, compose){
 		NodeListCtor = NodeListCtor || this._NodeListCtor || NodeList;
 
 		var nl = new NodeListCtor(array);
+		nl._query = parent ? parent._query : null;
 		return parent ? nl._stash(parent) : nl;
 	};
 	compose.call(NodeList.prototype, {
@@ -101,11 +102,20 @@ define(['./has', './compose'], function(has, compose){
 			);
 		},
 		filter: function(callback, thisObj){
-			// TODO: string filtering
 			return this._wrap(
 				filter.call(this, callback, thisObj),
 				this
 			);
+		},
+		queryFilter: function(selector, root){
+			if(this._query){
+				return this._wrap(
+					this._query.filter(this, selector, root),
+					this
+				);
+			}
+			console.warn('NodeList#queryFilter cannot be used on a NodeList that was not created by a query engine.');
+			return this.slice(0);
 		},
 		at: function(){
 			var t = new this._NodeListCtor(0);
