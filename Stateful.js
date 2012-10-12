@@ -27,7 +27,8 @@ define(['./compose', './when', './aspect'], function(compose, when, aspect){
 			var descriptors = this.__descriptors || {},
 				descriptor = descriptors[name] || {},
 				oldValue = this.get(name),
-				set = descriptor.set;
+				set = descriptor.set,
+				result;
 
 			if(set){
 				result = set.apply(this, slice.call(arguments, 1));
