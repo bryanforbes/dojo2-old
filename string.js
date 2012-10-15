@@ -8,27 +8,38 @@ define(['exports', './has'], function(exports, has){
 	has.add('string-toarray', typeof sp.toArray === 'function');
 
 	exports.startsWith = has('string-startswith') ?
-		function(string, search){
-			return string.startsWith(search);
+		function(string, search, position){
+			return string.startsWith(search, position);
 		} :
-		function(string, search){
-			return !string.indexOf(search);
+		function(string, search, position){
+			string = '' + string;
+			search = '' + search;
+			position = Math.min(Math.max(position || 0, 0), string.length);
+			return !string.indexOf(search, position);
 		};
 	exports.endsWith = has('string-endswith') ?
-		function(string, search){
-			return string.endsWith(search);
+		function(string, search, position){
+			return string.endsWith(search, position);
 		} :
-		function(string, search){
-			search = search + '';
-			var i = string.lastIndexOf(search);
-			return i >= 0 && i === (string.length - search.length);
+		function(string, search, position){
+			string = '' + string;
+			search = '' + search;
+			position = Math.min(Math.max(position || 0, 0), string.length);
+			var start = position - search.length;
+			if(start < 0){
+				return false;
+			}
+			return string.slice(start, start + search.length) === search;
 		};
 	exports.contains = has('string-contains') ?
-		function(string, search){
-			return string.contains(search);
+		function(string, search, position){
+			return string.contains(search, position);
 		} :
-		function(string, search){
-			return string.indexOf(search) !== -1;
+		function(string, search, position){
+			string = '' + string;
+			search = '' + search;
+			position = Math.min(Math.max(position || 0, 0), string.length);
+			return string.indexOf(search, position) !== -1;
 		};
 	exports.repeat = has('string-repeat') ?
 		function(string, count){
