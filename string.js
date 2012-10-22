@@ -1,4 +1,4 @@
-define(['exports', './has'], function(exports, has){
+define(['exports', './has', './object'], function(exports, has, object){
 	var sp = String.prototype;
 
 	has.add('string-startswith', typeof sp.startsWith === 'function');
@@ -47,11 +47,19 @@ define(['exports', './has'], function(exports, has){
 		} :
 		function(string, count){
 			string = string + '';
-			var result = '';
-			while(--count >= 0){
-				result += string;
+
+			if(count <= 0 || !string){
+				return '';
 			}
-			return result;
+			var buf = [];
+			while(true){
+				if(count & 1){
+					buf.push(string);
+				}
+				if(!(count >>= 1)){ break; }
+				string += string;
+			}
+			return buf.join('');
 		};
 	exports.toArray = has('string-toarray') ?
 		function(string){
@@ -60,4 +68,47 @@ define(['exports', './has'], function(exports, has){
 		function(string){
 			return string.split('');
 		};
+
+	function pad(text, size, ch){
+		if(!ch){
+			ch = '0';
+		}
+		return exports.repeat(ch, Math.ceil((size - text.length) / ch.length));
+	}
+
+	exports.padr = function(text, size, ch){
+		text = '' + text;
+		return text + pad(text, size, ch);
+	};
+	exports.padl = function(text, size, ch){
+		text = '' + text;
+		return pad(text, size, ch) + text;
+	};
+	var subRE = /\$\{([^\s\:\}]+)(?:\:([^\s\:\}]+))?\}/g;
+	exports.substitute = function(template, map, transform, formatterObject){
+		if(typeof transform === 'object'){
+			formatterObject = transform;
+			transform = null;
+		}
+		transform = transform || function(v){ return v; };
+		return template.replace(
+			subRE,
+			function(match, key, format){
+				var value = object.get(map, key);
+				if(format){
+					if(!formatterObject){
+						throw new Error('Formatter object not provided to substitute');
+					}
+					var formatter = object.get(formatterObject, format);
+					if(!formatter){
+						throw new Error('Formatter "' + format + '" not found on formatter object');
+					}else if(!formatter.call){
+						throw new Error('Formatter "' + format +'" is not callable');
+					}
+					value = formatter.call(formatterObject, value, key);
+				}
+				return '' + transform(value, key);
+			}
+		);
+	};
 });
