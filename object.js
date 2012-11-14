@@ -1,4 +1,4 @@
-define(['exports', './has'], function(exports, has){
+define(['exports', 'has'], function(exports, has){
 	has.add('object-is', typeof Object.is === 'function');
 	has.add('object-isnt', typeof Object.isnt === 'function');
 

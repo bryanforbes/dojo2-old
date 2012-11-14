@@ -1,4 +1,4 @@
-define(['exports', './has'], function(exports, has){
+define(['exports', 'has'], function(exports, has){
 
 	has.add('array-from', typeof Array.from === 'function');
 	has.add('array-to', typeof Array.to === 'function');

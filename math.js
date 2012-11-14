@@ -1,4 +1,4 @@
-define(['exports', './has'], function(exports, has){
+define(['exports', 'has'], function(exports, has){
 	has.add('math-log10', typeof Math.log10 === 'function');
 	has.add('math-log2', typeof Math.log2 === 'function');
 	has.add('math-log1p', typeof Math.log1p === 'function');

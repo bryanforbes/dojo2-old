@@ -1,4 +1,8 @@
-define(['exports', './has'], function(exports, has){
+define([
+	'exports',
+	'has/detect/bugs',
+	'has/detect/dom'
+], function(exports, has){
 	// module:
 	//		dojo/dom
 	// summary:
@@ -54,40 +58,9 @@ define(['exports', './has'], function(exports, has){
 	};
 	=====*/
 
-	has.add('bug-getelementbyid', function(g, d){
-		var input,
-			name = '__test_' + (+new Date()),
-			root = d.getElementsByTagName('script')[0].parentNode,
-			buggy = null;
-
-		input = d.createElement('input');
-		input.name = name;
-
-		try{
-			root.insertBefore(input, root.firstChild);
-			buggy = d.getElementById(name) === input;
-			root.removeChild(input);
-		}catch(e){}
-
-		if(buggy){
-			return buggy;
-		}
-
-		var script = d.createElement('script');
-		script.id = name;
-		script.type = 'text/javascript';
-		root.insertBefore(script, root.firstChild);
-
-		buggy = d.getElementById(name.toUpperCase()) === script;
-
-		root.removeChild(script);
-
-		return buggy;
-	});
-
 	var global = this;
 
-	if(has('bug-getelementbyid')){
+	if(has('bug-getelementbyid-ids-names') || has('bug-getelementbyid-ignores-case')){
 		exports.byId = function(id, doc){
 			if(typeof id !== 'string'){
 				return id;
@@ -119,19 +92,30 @@ define(['exports', './has'], function(exports, has){
 		};
 	}
 
-	exports.isDescendant = function(/*DOMNode|String*/node, /*DOMNode|String*/ancestor){
-		try{
+	if(has('bug-contains')){
+		exports.isDescendant = function(/*DOMNode|String*/node, /*DOMNode|String*/ancestor){
+			try{
+				node = exports.byId(node);
+				ancestor = exports.byId(ancestor);
+				while(node){
+					if(node === ancestor){
+						return true; // Boolean
+					}
+					node = node.parentNode;
+				}
+			}catch(e){ /* squelch, return false */ }
+			return false; // Boolean
+		};
+	}else{
+		exports.isDescendant = function(node, ancestor){
 			node = exports.byId(node);
 			ancestor = exports.byId(ancestor);
-			while(node){
-				if(node === ancestor){
-					return true; // Boolean
-				}
-				node = node.parentNode;
+			if(node === ancestor){
+				return true;
 			}
-		}catch(e){ /* squelch, return false */ }
-		return false; // Boolean
-	};
+			return ancestor.contains(node);
+		};
+	}
 
 	// Common feature tests
 	has.add('dom-qsa', function(global, document, element){
@@ -146,14 +130,5 @@ define(['exports', './has'], function(exports, has){
 			element.msMatchesSelector ||
 			element.oMatchesSelector
 		);
-	});
-	has.add('dom-limited-innerhtml', function(global, document){
-		var element = document.createElement('table');
-		try{
-			element.innerHTML = '<tbody></tbody>';
-		}catch(e){
-			return true;
-		}
-		return element.children.length;
 	});
 });

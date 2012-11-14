@@ -1,4 +1,4 @@
-define(['exports', './has', './object'], function(exports, has, object){
+define(['exports', 'has', './object'], function(exports, has, object){
 	var sp = String.prototype;
 
 	has.add('string-startswith', typeof sp.startsWith === 'function');

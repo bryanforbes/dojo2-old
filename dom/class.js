@@ -1,4 +1,4 @@
-define(['exports', '../dom', '../has'], function(exports, dom, has){
+define(['exports', '../dom', 'has/detect/dom'], function(exports, dom, has){
 	has.add('dom-classlist', function(global, document, element){
 		return 'classList' in element;
 	});
