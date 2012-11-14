@@ -8,7 +8,7 @@
 	},
 	"dependencies": {
 		"bdLoad": "https://github.com/bryanforbes/bdLoad/tree/amd-property",
-        "has": "https://github.com/bryanforbes/has.js/tree/amd"
+		"has": "https://github.com/bryanforbes/has.js/tree/amd"
 	},
 	"licenses": [
 		 {
