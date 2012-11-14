@@ -1,0 +1,27 @@
+{
+	"name": "dojo",
+	"version": "1.99.0",
+	"author": "Bryan Forbes",
+	"description": "An experiment for Dojo 2.0",
+	"directories": {
+		"lib": "."
+	},
+	"dependencies": {
+		"bdLoad": "https://github.com/bryanforbes/bdLoad/tree/amd-property",
+        "has": "https://github.com/bryanforbes/has.js/tree/amd"
+	},
+	"licenses": [
+		 {
+				 "type": "AFLv2.1",
+				 "url": "http://trac.dojotoolkit.org/browser/dojo/trunk/LICENSE#L43"
+		 },
+		 {
+				 "type": "BSD",
+				 "url": "http://trac.dojotoolkit.org/browser/dojo/trunk/LICENSE#L13"
+		 }
+	],
+	"repository": {
+		"type":"git",
+		"url":"https://github.com/bryanforbes/dojo2"
+	}
+}
